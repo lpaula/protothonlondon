@@ -60,3 +60,24 @@ video, #info, #description {
 #controller #ctrl1 { top: 400px; left: 0px; }
 #controller #ctrl2 { top: 400px; left: 580px; }
 
+#slider1 { 
+	display:none;
+	position: absolute;
+	top: 100px;
+	left: 20px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	
+}
+#slider2 { 
+	display:none;
+	position: absolute;
+	top: 100px;
+	left: 595px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	
+}
+
