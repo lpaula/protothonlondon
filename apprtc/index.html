@@ -101,6 +101,8 @@
   }
 
 </style>
+
+  <link rel="stylesheet" href="/images/styles/main.css"/>
 </head>
 <body>
 <div id="container" ondblclick="enterFullScreen()"> 
@@ -121,9 +123,25 @@
   <a href="http://www.webrtc.org">
   <img id="logo" alt="WebRTC" src="images/webrtc_black_20p.png">
   </a>
+
+
+<canvas id="canvas-source" width="640" height="480"></canvas>
+<canvas id="canvas-blended" width="640" height="480"></canvas>
+
+
+<div id="controller">
+  <div id="front">
+    <img id="ctrl1" src="images/play.png"/>
+    <img id="ctrl2" src="images/pause.png"/>
+  </div>
+</div>
+
+
 </div>
 <script type="text/javascript" src="http://localhost:1338/faye/client.js"></script>
 <script type="text/javascript" src="/js/abbey-load.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/app.js"></script>
 <script type="text/javascript">
 
 function filterHandler(source, value) {
@@ -164,6 +182,17 @@ function filterHandler(source, value) {
   });
 
   var fayeClient;
+  var initiator = 1;
+
+  $('#server').on('click', function() {
+    initiator = 0;
+    setupFaye();
+  });
+
+  $('#client').on('click', function() {
+    initiator = 1;
+    setupFaye();
+  });
 
   function setupFaye() {
     fayeClient = new Faye.Client('http://localhost:1338/faye', {
@@ -172,14 +201,20 @@ function filterHandler(source, value) {
 
     if(!initiator){
       console.log('>>> Im the server');
-      fayeClient.subscribe('/play', function(message) {
+      fayeClient.subscribe('/rate', function(message) {
+        console.log('FAYE MESSAAAAAAAAAAAAAAAAAAAAAAAAGE', message);
+      });
+      fayeClient.subscribe('/filter', function(message) {
         console.log('FAYE MESSAAAAAAAAAAAAAAAAAAAAAAAAGE', message);
       });
     } else {
       console.log('>>> Im the client');
-       fayeClient.publish('/play', 'play me');
     }
   }
+
+  window.sendMessage= function(channel, value) {
+    fayeClient.publish('/'+channel, value);
+  };
 
 
   var localVideo;
@@ -211,7 +246,6 @@ function filterHandler(source, value) {
     openChannel('{{ token }}');
     startTokenRefresh();
     doGetUserMedia();
-    setupFaye();
   }
 
   function openChannel(channelToken) {
@@ -357,6 +391,7 @@ function filterHandler(source, value) {
     attachMediaStream(localVideo, stream);
     localVideo.style.opacity = 1;
     localStream = stream;
+    startCanvas(localVideo);
     // Caller creates PeerConnection.
     if (initiator) maybeStart();
   }

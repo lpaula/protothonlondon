@@ -92,7 +92,7 @@
 		blend();
 		//checkAreas();
 		checkSlider();
-		timeOut = setTimeout(update, 1000/60);
+		timeOut = setTimeout(update, 1000/30);
 	}
 
 	function drawVideo() {
@@ -173,7 +173,8 @@
 			average = Math.round(average / (blendedData.data.length * 0.25));
 			if (average > 10) {
 				//Motion Detected on Controller 1
-				document.getElementById('ctrl1').style.top = r + 'px';
+				//document.getElementById('ctrl1').style.top = r + 'px';
+				window.sendMessage('rate', r);
 				//console.log("Motion detected: x=" + x + " y ="+y );
 			}
 			x = 580;
@@ -192,7 +193,8 @@
 			if (average > 10) {
 				//Motion Detected on Controller 2
 				//console.log("Motion detected: x=" + x + " y ="+ y );
-				document.getElementById('ctrl2').style.top = r + 'px';
+				//document.getElementById('ctrl2').style.top = r + 'px';
+				window.sendMessage('filter', r);
 			}
 		}
 	}

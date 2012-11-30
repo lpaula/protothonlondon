@@ -15,6 +15,10 @@
 </div>
 
 <!--<device type="media"></device>-->
+
+<button id="server">I'm the server</button>
+<button id="client">I'm the client</button>
+
 <video id="webcam" autoplay width="640" height="480"></video>
 
 <video id="video-demo" controls="controls" poster="videos/jsdetection.jpg" width="640" height="480"  onclick="if(/Android/.test(navigator.userAgent))this.play();">
@@ -31,10 +35,101 @@
 	</div>
 </div>
 
-
+<script type="text/javascript" src="http://localhost:1338/faye/client.js"></script>
+<script type="text/javascript" src="/js/abbey-load.js"></script>
 <script src="js/libs/jquery.js"></script>
 <script src="js/libs/buffer-loader.js"></script>
 <script src="js/app.js"></script>
+
+<script type="text/javascript">
+
+
+ var initiator = 1;
+
+  $('#server').on('click', function() {
+    initiator = 0;
+    setupFaye();
+  });
+
+  $('#client').on('click', function() {
+    initiator = 1;
+    setupFaye();
+  });
+
+
+function filterHandler(source, value) {
+  var sampleRate = 44100.0;  // !!@@ don't hardcode
+  var nyquist = sampleRate * 0.5;
+  var noctaves = Math.log(nyquist / 40.0) / Math.LN2;
+  var v2 = Math.pow(2.0, noctaves * (value - 1.0));
+  var cutoff = v2*nyquist;
+
+  source.frequency.value = cutoff;
+}
+
+
+var soundSource;
+  
+  function loadSounds() {
+    var assets = new AbbeyLoad([{
+      wretched: "loop1.wav"
+    }], function(buffers) {
+      var context = new webkitAudioContext();
+
+      var source = context.createBufferSource();
+      source.buffer = buffers.wretched;
+      source.playbackRate.value = 1;
+      soundSource = source;
+
+      /*
+      var gain = context.createGainNode();
+      gain.value = 1;
+      source.connect(gain);
+
+      var filter = context.createBiquadFilter()
+      filterHandler(filter, 20);
+      gain.connect(filter);
+
+      source.connect(gain);
+      */
+
+      source.connect(context.destination);
+      source.loop = true;
+      source.noteOn(0);
+    });
+  }
+
+  var fayeClient;
+
+  function setupFaye() {
+    fayeClient = new Faye.Client('http://localhost:1338/faye', {
+      timeout: 120
+    }); 
+
+    if(!initiator){
+      console.log('>>> Im the server');
+      fayeClient.subscribe('/rate', function(message) {
+        var modifier = parseInt(message) / 1000;
+        soundSource.playbackRate.value = modifier;
+        console.log('rate', modifier);
+      });
+      fayeClient.subscribe('/filter', function(message) {
+        //console.log('filter', message);
+      });
+      loadSounds();
+    } else {
+      console.log('>>> Im the client');
+    }
+  }
+
+  window.sendMessage= function(channel, value) {
+    if(fayeClient && initiator){
+      fayeClient.publish('/'+channel, value);
+    }
+  };
+
+</script>
+
 
 </body>
 </html>
