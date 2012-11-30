@@ -123,7 +123,65 @@
   </a>
 </div>
 <script type="text/javascript" src="http://localhost:1338/faye/client.js"></script>
+<script type="text/javascript" src="/js/abbey-load.js"></script>
 <script type="text/javascript">
+
+function filterHandler(source, value) {
+  var sampleRate = 44100.0;  // !!@@ don't hardcode
+  var nyquist = sampleRate * 0.5;
+  var noctaves = Math.log(nyquist / 40.0) / Math.LN2;
+  var v2 = Math.pow(2.0, noctaves * (value - 1.0));
+  var cutoff = v2*nyquist;
+  
+  source.frequency.value = cutoff;
+}
+
+
+  
+  var assets = new AbbeyLoad([{
+    wretched: "/js/the_wretched.mp3"
+  }], function(buffers) {
+    var context = new webkitAudioContext();
+
+    var source = context.createBufferSource();
+    source.buffer = buffers.wretched;
+    source.playbackRate.value = 1;
+
+    /*
+    var gain = context.createGainNode();
+    gain.value = 1;
+    source.connect(gain);
+
+    var filter = context.createBiquadFilter()
+    filterHandler(filter, 20);
+    gain.connect(filter);
+
+    source.connect(gain);
+    */
+
+    source.connect(context.destination);
+    source.noteOn(0);
+  });
+
+  var fayeClient;
+
+  function setupFaye() {
+    fayeClient = new Faye.Client('http://localhost:1338/faye', {
+      timeout: 120
+    }); 
+
+    if(!initiator){
+      console.log('>>> Im the server');
+      fayeClient.subscribe('/play', function(message) {
+        console.log('FAYE MESSAAAAAAAAAAAAAAAAAAAAAAAAGE', message);
+      });
+    } else {
+      console.log('>>> Im the client');
+       fayeClient.publish('/play', 'play me');
+    }
+  }
+
+
   var localVideo;
   var miniVideo;
   var remoteVideo;
@@ -153,6 +211,7 @@
     openChannel('{{ token }}');
     startTokenRefresh();
     doGetUserMedia();
+    setupFaye();
   }
 
   function openChannel(channelToken) {
