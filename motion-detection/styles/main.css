@@ -1,0 +1,62 @@
+body {
+	font-family: Helvetica, Arial, "sans serif";
+	font-size: 12px;
+}
+
+video, #info, #description {
+	display: none;
+}
+
+#video-demo {
+	display: none;
+	position: absolute;
+	top: 150px;
+	left: 10px;
+}
+
+#canvas-source {
+	display: none;
+	position: absolute;
+	top: 40px;
+	left: 10px;
+}
+
+#canvas-blended {
+	display: none;
+	position: absolute;
+	;top: 407px;
+	top: 40px;
+	;left: 500px;
+	left: 10px;
+	;width: 150px;
+	;height: 113px;
+	width: 640px;
+	height: 480px;
+}
+
+#controller {
+	display:none;
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px solid yellow;
+}
+
+#controller #front {
+	position: absolute;
+	top: 0;
+	left: 0px;
+	z-index:1;
+	width: 440px;
+	margin: 0px;
+	padding: 0px;
+}
+#controller #front img {
+	position: absolute;
+	/*display: none; */
+}
+#controller #ctrl1 { top: 400px; left: 0px; }
+#controller #ctrl2 { top: 400px; left: 580px; }
+
